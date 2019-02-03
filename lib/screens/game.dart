@@ -94,11 +94,7 @@ class _GameState extends State<Game> {
       drawer: SizedBox(
         width: 200,
         child: Drawer(
-          // Add a ListView to the drawer. This ensures the user can scroll
-          // through the options in the Drawer if there isn't enough vertical
-          // space to fit everything.
           child: ListView(
-            // Important: Remove any padding from the ListView.
             padding: EdgeInsets.zero,
             children: <Widget>[
               DrawerHeader(
@@ -175,7 +171,7 @@ class _GameState extends State<Game> {
                   ],
                 );
               } else {
-                Map<String, dynamic> accepted = null;
+                CardModel accepted;
                 return CustomScrollView(
                   slivers: <Widget>[
                     SliverPersistentHeader(
@@ -193,13 +189,13 @@ class _GameState extends State<Game> {
                               ),
                               DragTarget(
                                 builder: (context,
-                                    List<Map<String, dynamic>> candidateData,
+                                    List<CardModel> candidateData,
                                     rejectedData) {
                                   return Container(
                                     padding: EdgeInsets.all(5),
                                     child: accepted != null
                                         ? Text(
-                                            accepted['text'],
+                                            accepted.text,
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               color: Colors.white,
@@ -217,16 +213,17 @@ class _GameState extends State<Game> {
                                           ),
                                   );
                                 },
-                                onWillAccept: (data) {
-                                  if (data['id'] > 0) {
+                                onWillAccept: (CardModel data) {
+                                  if (data.id > 0) {
                                     print('data: $data');
                                     return true;
                                   } else {
                                     return false;
                                   }
                                 },
-                                onAccept: (data) {
+                                onAccept: (CardModel data) {
                                   accepted = data;
+                                  _playerBloc.chosenCardSink.add(data);
                                 },
                               ),
                               Text(
@@ -298,19 +295,10 @@ class Cards extends StatelessWidget {
               CardModel card = snapshot.data[index];
 
               return Draggable(
-                data: {
-                  'id': card.id,
-                  'text': card.text,
-                },
-                feedback: Card(
-                  id: card.id,
-                  text: card.text,
-                ),
+                data: card,
+                feedback: Card(card: card),
                 childWhenDragging: Container(),
-                child: Card(
-                  id: card.id,
-                  text: card.text,
-                ),
+                child: Card(card: card),
               );
             },
           ),
@@ -322,10 +310,12 @@ class Cards extends StatelessWidget {
 
 class Card extends StatelessWidget {
   final Key key;
-  final int id;
-  final String text;
+  final CardModel card;
 
-  Card({this.key, @required this.id, @required this.text}) : super(key: key);
+  Card({
+    this.key,
+    @required this.card,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +326,7 @@ class Card extends StatelessWidget {
       padding: EdgeInsets.all(10),
       color: Colors.white,
       child: Text(
-        text,
+        card.text,
         style: style.copyWith(color: Colors.black),
       ),
     );
@@ -344,11 +334,15 @@ class Card extends StatelessWidget {
 }
 
 class PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
-  PersistentHeaderDelegate({this.child, this.minExtent, this.maxExtent});
-
   final Widget child;
   final double minExtent;
   final double maxExtent;
+
+  PersistentHeaderDelegate({
+    @required this.child,
+    @required this.minExtent,
+    @required this.maxExtent,
+  }) : super();
 
   @override
   Widget build(
