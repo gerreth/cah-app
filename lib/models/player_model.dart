@@ -1,5 +1,7 @@
+import './card_model.dart';
+
 class PlayerModel {
-  final List<dynamic> cards;
+  final List<CardModel> cards;
   final bool dealer;
   final String id;
   final String name;
@@ -7,7 +9,11 @@ class PlayerModel {
 
   PlayerModel.fromJson(Map<String, dynamic> parsedJson)
       : id = parsedJson['id'],
-        cards = parsedJson['cards'],
+        cards = parsedJson['cards'].map<CardModel>(
+          (dynamic player) {
+            return CardModel.fromJson(player);
+          },
+        ).toList(),
         dealer = parsedJson['dealer'],
         name = parsedJson['name'],
         points = parsedJson['points'];

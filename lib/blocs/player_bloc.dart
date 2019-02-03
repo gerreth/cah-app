@@ -2,15 +2,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../models/card_model.dart';
+
 class PlayerBloc {
-  final _cards = BehaviorSubject<List<dynamic>>();
+  final _cards = BehaviorSubject<List<CardModel>>();
+  final _chosenCard = BehaviorSubject<CardModel>();
 
-  Sink<List<dynamic>> get cardsSink => _cards.sink;
+  Sink<List<CardModel>> get cardsSink => _cards.sink;
+  Sink<CardModel> get chosenCardSink => _chosenCard.sink;
 
-  Stream<List<dynamic>> get cardsStream => _cards.stream;
+  Stream<List<CardModel>> get cardsStream => _cards.stream;
+  Stream<CardModel> get chosenCardStream => _chosenCard.stream;
 
   dispose() {
     _cards.close();
+    _chosenCard.close();
   }
 }
 

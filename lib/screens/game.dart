@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 
+import '../models/card_model.dart';
 import '../models/player_model.dart';
 import '../provider/game_communication.dart';
 import '../provider/game_provider.dart';
@@ -55,6 +56,7 @@ class _GameState extends State<Game> {
 
         PlayerModel thisPlayer =
             playerModels.firstWhere((player) => player.id == game.playerID);
+
         _playerBloc.cardsSink.add(thisPlayer.cards);
 
         if (playerModels.length < 2) {
@@ -81,6 +83,14 @@ class _GameState extends State<Game> {
     );
 
     return Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          child: FlatButton(
+            child: Text('Send'),
+            onPressed: () {},
+          ),
+        ),
+      ),
       drawer: SizedBox(
         width: 200,
         child: Drawer(
@@ -165,33 +175,69 @@ class _GameState extends State<Game> {
                   ],
                 );
               } else {
-                bool accepted = false;
+                Map<String, dynamic> accepted = null;
                 return CustomScrollView(
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildListDelegate(
-                        [
-                          Container(
-                            margin: EdgeInsets.all(20),
-                            padding: EdgeInsets.all(10),
-                            child: Text(
-                              'Lorem ipsum dolor ____________ sit amet at balbd',
-                              style: TextStyle(color: Colors.white),
-                            ),
+                    SliverPersistentHeader(
+                      floating: true,
+                      pinned: true,
+                      delegate: PersistentHeaderDelegate(
+                        child: Container(
+                          color: Colors.black,
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                'Lorem ipsum dolor ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              DragTarget(
+                                builder: (context,
+                                    List<Map<String, dynamic>> candidateData,
+                                    rejectedData) {
+                                  return Container(
+                                    padding: EdgeInsets.all(5),
+                                    child: accepted != null
+                                        ? Text(
+                                            accepted['text'],
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                          )
+                                        : Text(
+                                            '___________',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              decorationColor: Colors.red,
+                                            ),
+                                          ),
+                                  );
+                                },
+                                onWillAccept: (data) {
+                                  if (data['id'] > 0) {
+                                    print('data: $data');
+                                    return true;
+                                  } else {
+                                    return false;
+                                  }
+                                },
+                                onAccept: (data) {
+                                  accepted = data;
+                                },
+                              ),
+                              Text(
+                                ' sit amet at balbd',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
                           ),
-                          DragTarget(
-                            builder: (context, List<String> candidateData,
-                                rejectedData) {
-                              return accepted ? Container() : Container();
-                            },
-                            onWillAccept: (data) {
-                              return true;
-                            },
-                            onAccept: (data) {
-                              accepted = true;
-                            },
-                          ),
-                        ],
+                        ),
+                        maxExtent: 140,
+                        minExtent: 120,
                       ),
                     ),
                     SliverPadding(
@@ -210,7 +256,7 @@ class _GameState extends State<Game> {
 }
 
 class Cards extends StatelessWidget {
-  final Stream stream;
+  final Stream<List<CardModel>> stream;
 
   Cards(this.stream);
 
@@ -218,7 +264,7 @@ class Cards extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: stream,
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<CardModel>> snapshot) {
         // TODO: handle waiting and error
         if (snapshot.hasError)
           return SliverGrid.count(
@@ -249,17 +295,21 @@ class Cards extends StatelessWidget {
           children: List.generate(
             6,
             (index) {
-              dynamic card = snapshot.data[index];
+              CardModel card = snapshot.data[index];
 
               return Draggable(
+                data: {
+                  'id': card.id,
+                  'text': card.text,
+                },
                 feedback: Card(
-                  id: card['id'],
-                  text: card['text'],
+                  id: card.id,
+                  text: card.text,
                 ),
                 childWhenDragging: Container(),
                 child: Card(
-                  id: card['id'],
-                  text: card['text'],
+                  id: card.id,
+                  text: card.text,
                 ),
               );
             },
@@ -290,5 +340,27 @@ class Card extends StatelessWidget {
         style: style.copyWith(color: Colors.black),
       ),
     );
+  }
+}
+
+class PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  PersistentHeaderDelegate({this.child, this.minExtent, this.maxExtent});
+
+  final Widget child;
+  final double minExtent;
+  final double maxExtent;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(PersistentHeaderDelegate oldDelegate) {
+    return false;
   }
 }
