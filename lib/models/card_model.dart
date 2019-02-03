@@ -6,6 +6,10 @@ class CardModel {
       : id = parsedJson['id'],
         text = parsedJson['text'];
 
+  CardModel.empty()
+      : id = null,
+        text = null;
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       "id": id,

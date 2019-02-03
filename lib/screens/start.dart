@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 
+import '../blocs/game_bloc.dart';
 import '../models/player_model.dart';
 import '../provider/game_communication.dart';
 import '../provider/game_provider.dart';
@@ -22,7 +23,6 @@ class _StartState extends State<Start> {
   GameBloc _bloc;
 
   void leaveGame() {
-    print('game.playerID: ${game.playerID}');
     game.send('leave', game.playerID);
     Navigator.pop(context);
   }
@@ -52,14 +52,12 @@ class _StartState extends State<Start> {
 
   void _update(message) {
     switch (message["action"]) {
+      case 'player_cards':
+        print('player_cards');
+        _bloc.addCards(message["data"]);
+        break;
       case 'players_list':
-        List<PlayerModel> playerModels = message['data'].map<PlayerModel>(
-          (dynamic player) {
-            return PlayerModel.fromJson(player);
-          },
-        ).toList();
-
-        _bloc.playersSink.add(playerModels);
+        _bloc.addPlayers(message["data"], context);
         break;
       case 'game_start':
         _bloc.roundSink.add(1);
@@ -112,11 +110,8 @@ class _StartState extends State<Start> {
                 builder: (BuildContext context,
                     AsyncSnapshot<List<PlayerModel>> snapshot) {
                   // TODO: handle waiting and error
-                  print(snapshot);
                   if (snapshot.hasError) return Text('error');
                   if (snapshot.data == null) return Text('waiting');
-
-                  print(snapshot.data);
 
                   return ListView(
                     shrinkWrap: true,

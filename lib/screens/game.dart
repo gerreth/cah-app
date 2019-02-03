@@ -1,9 +1,11 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 
+import '../blocs/game_bloc.dart';
 import '../models/card_model.dart';
 import '../models/player_model.dart';
 import '../provider/game_communication.dart';
@@ -45,23 +47,14 @@ class _GameState extends State<Game> {
 
   void _update(message) {
     switch (message["action"]) {
+      case 'player_cards':
+        print('player_cards');
+        _bloc.addCards(message["data"]);
+        break;
       case 'players_list':
-        List<PlayerModel> playerModels = message['data'].map<PlayerModel>(
-          (dynamic player) {
-            return PlayerModel.fromJson(player);
-          },
-        ).toList();
-
-        _bloc.playersSink.add(playerModels);
-
-        PlayerModel thisPlayer =
-            playerModels.firstWhere((player) => player.id == game.playerID);
-
-        _playerBloc.cardsSink.add(thisPlayer.cards);
-
-        if (playerModels.length < 2) {
-          Navigator.pop(context);
-        }
+        print('players_list');
+        _bloc.addChosenCards(message["data"]);
+        _bloc.addPlayers(message["data"], context);
         break;
       case 'next_round':
         _bloc.roundSink.add(message["data"]);
@@ -71,6 +64,10 @@ class _GameState extends State<Game> {
 
   void nextRound() {
     game.send('next_round', '1');
+  }
+
+  void sendCard(CardModel card) {
+    game.send('send_card', jsonEncode(card.toMap()));
   }
 
   @override
@@ -84,11 +81,21 @@ class _GameState extends State<Game> {
 
     return Scaffold(
       bottomNavigationBar: BottomAppBar(
-        child: Container(
-          child: FlatButton(
-            child: Text('Send'),
-            onPressed: () {},
-          ),
+        child: StreamBuilder(
+          stream: _playerBloc.chosenCardStream,
+          builder: (BuildContext context, AsyncSnapshot<CardModel> snapshot) {
+            if (snapshot.hasError) return Text('error');
+            if (snapshot.data == null) return Text('Please select');
+
+            return Container(
+              child: FlatButton(
+                child: Text('Send'),
+                onPressed: () {
+                  sendCard(snapshot.data);
+                },
+              ),
+            );
+          },
         ),
       ),
       drawer: SizedBox(
@@ -108,8 +115,27 @@ class _GameState extends State<Game> {
                 builder: (BuildContext context,
                     AsyncSnapshot<List<PlayerModel>> snapshot) {
                   // TODO: handle waiting and error
-                  if (snapshot.hasError) return Text('error');
-                  if (snapshot.data == null) return Text('waiting');
+                  if (snapshot.hasError)
+                    return SliverGrid.count(
+                      crossAxisCount: 1,
+                      children: List.generate(
+                        1,
+                        (index) {
+                          return Text('error');
+                        },
+                      ),
+                    );
+                  if (snapshot.data == null)
+                    return SliverGrid.count(
+                      crossAxisCount: 1,
+                      children: List.generate(
+                        1,
+                        (index) {
+                          return Text('waiting');
+                        },
+                      ),
+                    );
+                  ;
 
                   snapshot.data.sort((a, b) => b.points.compareTo(a.points));
 
@@ -157,6 +183,57 @@ class _GameState extends State<Game> {
                               'Lorem ipsum dolor ____________ sit amet at balbd',
                               style: TextStyle(color: Colors.white),
                             ),
+                          ),
+                          // SliverPadding(
+                          //   padding: EdgeInsets.all(10.0),
+                          //   sliver: StreamBuilder(
+                          //     stream: _bloc.chosenCardsStream,
+                          //     builder: (BuildContext context,
+                          //         AsyncSnapshot snapshot) {
+                          //       if (snapshot.hasError) return Text('error');
+                          //       if (snapshot.data == null)
+                          //         return Text('waiting');
+
+                          //       print(snapshot.data);
+
+                          //       return SliverGrid.count(
+                          //         // Create a grid with 2 columns. If you change the scrollDirection to
+                          //         // horizontal, this would produce 2 rows.
+                          //         crossAxisCount: 2,
+                          //         children: List.generate(
+                          //           snapshot.data.length,
+                          //           (index) {
+                          //             CardModel card = snapshot.data[index];
+
+                          //             return Draggable(
+                          //               data: card,
+                          //               feedback: Card(card: card),
+                          //               childWhenDragging: Container(),
+                          //               child: Card(card: card),
+                          //             );
+                          //           },
+                          //         ),
+                          //       );
+                          //     },
+                          //   ),
+                          // ),
+                          StreamBuilder(
+                            builder: (BuildContext context,
+                                AsyncSnapshot<List<CardModel>> snapshot) {
+                              if (snapshot.data == null) return Text('null');
+                              return Column(
+                                children: snapshot.data
+                                    .map(
+                                      (card) => Text(
+                                            card.text,
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                    )
+                                    .toList(),
+                              );
+                            },
+                            stream: _bloc.chosenCardsStream,
                           ),
                           RaisedButton(
                             child: Text(
@@ -215,7 +292,6 @@ class _GameState extends State<Game> {
                                 },
                                 onWillAccept: (CardModel data) {
                                   if (data.id > 0) {
-                                    print('data: $data');
                                     return true;
                                   } else {
                                     return false;
@@ -239,7 +315,7 @@ class _GameState extends State<Game> {
                     ),
                     SliverPadding(
                       padding: EdgeInsets.all(10.0),
-                      sliver: Cards(_playerBloc.cardsStream),
+                      sliver: Cards(_bloc.cardsStream),
                     ),
                   ],
                 );
