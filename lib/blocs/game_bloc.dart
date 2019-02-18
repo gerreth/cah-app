@@ -49,6 +49,8 @@ class GameBloc {
         .map<PlayerModel>((dynamic player) => PlayerModel.fromJson(player))
         .toList();
 
+    print(players);
+
     playersSink.add(players);
 
     if (players.length < 2) {

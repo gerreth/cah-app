@@ -34,7 +34,6 @@ class _StartState extends State<Start> {
   @override
   void initState() {
     super.initState();
-
     game.addListener(_update);
   }
 
@@ -57,6 +56,7 @@ class _StartState extends State<Start> {
         _bloc.addCards(message["data"]);
         break;
       case 'players_list':
+        print('start -> players_list');
         _bloc.addPlayers(message["data"], context);
         break;
       case 'game_start':

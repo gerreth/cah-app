@@ -11,18 +11,12 @@ class PlayerModel {
 
   PlayerModel.fromJson(Map<String, dynamic> parsedJson)
       : id = parsedJson['id'],
-        // card = parsedJson['card'],
         card = parsedJson['card'] != null
             ? CardModel.fromJson(parsedJson['card'])
             : CardModel.empty(),
-        // cards = parsedJson['cards'].map<CardModel>(
-        //   (dynamic player) {
-        //     return CardModel.fromJson(player);
-        //   },
-        // ).toList(),
-        dealer = parsedJson['dealer'],
+        dealer = parsedJson['dealer'] ?? false,
         name = parsedJson['name'],
-        points = parsedJson['points'];
+        points = parsedJson['points'] ?? 0;
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
