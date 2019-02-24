@@ -1,22 +1,22 @@
 class CardModel {
-  final int id;
-  final String text;
+  final int cardId;
+  final String cardText;
 
   CardModel.fromJson(Map<String, dynamic> parsedJson)
-      : id = parsedJson['id'],
-        text = parsedJson['text'];
+      : cardId = parsedJson['cardId'],
+        cardText = parsedJson['cardText'];
 
   CardModel.empty()
-      : id = null,
-        text = null;
+      : cardId = null,
+        cardText = null;
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      "id": id,
-      "text": text,
+      "cardId": cardId,
+      "cardText": cardText,
     };
   }
 
   @override
-  String toString() => 'Card: $text - $id';
+  String toString() => 'Card: $cardText - $cardId';
 }

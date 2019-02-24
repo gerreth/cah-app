@@ -49,13 +49,6 @@ class _GameState extends State<Game> {
 
   void _update(message) {
     switch (message['action']) {
-      case 'player_cards':
-        _gameBloc.addCards(message['data']);
-        break;
-      case 'players_list':
-        _gameBloc.addChosenCards(message['data']);
-        _gameBloc.addPlayers(message['data']);
-        break;
       case 'game_next_round':
         _gameBloc.roundSink.add(message['data']['round']);
         _gameBloc.addPlayers(message['data']['players_list']);
@@ -114,28 +107,20 @@ class GameView extends StatelessWidget {
             onTap: onBack,
           ),
           StreamBuilder(
-            initialData: 1,
-            stream: gameBloc.roundStream,
-            builder: (context, snapshot) {
+            stream: gameBloc.playerStream,
+            builder: (context, AsyncSnapshot<PlayerModel> snapshot) {
               if (snapshot.hasError) return Text('error');
               if (snapshot.data == null) return Text('waiting');
 
-              return StreamBuilder(
-                stream: gameBloc.playerStream,
-                builder: (context, AsyncSnapshot<PlayerModel> snapshot) {
-                  if (snapshot.hasError) return Text('error');
-                  if (snapshot.data == null) return Text('waiting');
-                  print(snapshot.data.dealer);
+              PlayerModel player = snapshot.data;
 
-                  if (snapshot.data.dealer) {
-                    return DealerView(
-                      nextRound: nextRound,
-                    );
-                  } else {
-                    return PlayerView();
-                  }
-                },
-              );
+              if (player.dealer) {
+                return DealerView(
+                  nextRound: nextRound,
+                );
+              } else {
+                return PlayerView(player: player);
+              }
             },
           ),
         ],
@@ -159,10 +144,43 @@ class DealerView extends StatelessWidget {
 }
 
 class PlayerView extends StatelessWidget {
+  PlayerView({Key key, this.player}) : super(key: key);
+
+  final PlayerModel player;
+
+  List<Widget> renderCards() {
+    return player.cards.map(
+      (card) {
+        return Container(
+          color: Colors.white,
+          child: Text(
+            card.cardText,
+            style: TextStyle(fontSize: 14),
+          ),
+          padding: EdgeInsets.all(16),
+        );
+      },
+    ).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'TEST',
+    return Column(
+      children: <Widget>[
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          padding: EdgeInsets.symmetric(vertical: 32),
+          physics: NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          children: renderCards(),
+        ),
+        Button(
+          text: 'Karte wählen',
+          onTap: () {},
+        ),
+      ],
     );
   }
 }

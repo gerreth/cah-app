@@ -52,16 +52,14 @@ class _StartState extends State<Start> {
   }
 
   void _update(message) {
-    switch (message["action"]) {
-      case 'player_cards':
-        _gameBloc.addCards(message["data"]);
-        break;
+    switch (message['action']) {
       case 'players_list':
-        _gameBloc.addPlayers(message["data"]);
+        _gameBloc.addPlayers(message['data']);
         break;
       case 'game_start':
-        _gameBloc.addPlayers(message["data"]);
-        _gameBloc.roundSink.add(1);
+        _gameBloc.addPlayers(message['data']['players_list']);
+        _gameBloc.roundSink.add(message['data']['round']);
+        _gameBloc.blackCardSink.add(message['data']['card']);
         continue game_has_started;
       game_has_started:
       case 'game_has_started':
