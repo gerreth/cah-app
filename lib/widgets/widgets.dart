@@ -33,16 +33,20 @@ class InputTextField extends StatelessWidget {
   InputTextField({
     @required this.controller,
     @required this.hintText,
+    this.onSubmitted,
   }) : super();
 
   final TextEditingController controller;
   final String hintText;
+  final Function onSubmitted;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.text,
+      textInputAction: TextInputAction.done,
+      onSubmitted: onSubmitted,
       decoration: InputDecoration(
         border: InputBorder.none,
         enabledBorder: InputBorder.none,

@@ -5,6 +5,7 @@ import '../blocs/game_bloc.dart';
 import '../provider/game_communication.dart';
 import '../provider/game_provider.dart';
 import '../widgets/atoms/button.dart';
+import '../widgets/templates/default_template.dart';
 import '../widgets/widgets.dart';
 
 class Home extends StatefulWidget {
@@ -60,7 +61,7 @@ class _HomeState extends State<Home> {
       ),
     );
 
-    return HomeTemplate(
+    return DefaultTemplate(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,35 +82,21 @@ class _HomeState extends State<Home> {
           InputTextField(
             controller: controller,
             hintText: 'Enter your name',
+            onSubmitted: (value) => joinGame(),
           ),
           SizedBox(height: 48),
           Button(
             text: 'Start',
             onTap: joinGame,
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class HomeTemplate extends StatelessWidget {
-  HomeTemplate({this.child}) : super();
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.black,
-            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-            child: child,
+          SizedBox(height: 48),
+          Button(
+            text: 'Reset',
+            onTap: () {
+              game.reset();
+            },
           ),
-        ),
+        ],
       ),
     );
   }

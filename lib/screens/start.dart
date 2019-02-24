@@ -9,6 +9,8 @@ import '../models/player_model.dart';
 import '../provider/game_communication.dart';
 import '../provider/game_provider.dart';
 import '../widgets/atoms/button.dart';
+import '../widgets/atoms/custom_back_button.dart';
+import '../widgets/templates/default_template.dart';
 
 class Start extends StatefulWidget {
   Start({Key key, this.title}) : super(key: key);
@@ -120,12 +122,12 @@ class StartView extends StatelessWidget {
       ),
     );
 
-    return StartTemplate(
+    return DefaultTemplate(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          BackButton(
+          CustomBackButton(
             onTap: onBack,
           ),
           StreamBuilder(
@@ -150,63 +152,6 @@ class StartView extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class BackButton extends StatelessWidget {
-  BackButton({Key key, this.onTap}) : super(key: key);
-
-  final Function onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: SizedBox(
-        height: 48,
-        width: 48,
-        child: Material(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24.0),
-          ),
-          color: Colors.black,
-          child: InkResponse(
-            borderRadius: BorderRadius.circular(24.0),
-            containedInkWell: true,
-            highlightShape: BoxShape.rectangle,
-            highlightColor: Colors.white.withOpacity(0.2),
-            splashColor: Colors.white.withOpacity(0.2),
-            onTap: onTap,
-            child: Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class StartTemplate extends StatelessWidget {
-  StartTemplate({this.child}) : super();
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.black,
-            child: child,
-            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-          ),
-        ),
       ),
     );
   }
