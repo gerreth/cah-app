@@ -14,7 +14,7 @@ class DefaultTemplate extends StatelessWidget {
           child: Container(
             color: Colors.black,
             child: child,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 32),
           ),
         ),
       ),
