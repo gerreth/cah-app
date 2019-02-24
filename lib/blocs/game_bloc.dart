@@ -11,17 +11,20 @@ class GameBloc {
 
   final _chosenCards = BehaviorSubject<List<CardModel>>();
   final _cards = BehaviorSubject<List<CardModel>>();
+  final _player = BehaviorSubject<PlayerModel>();
   final _players = BehaviorSubject<List<PlayerModel>>();
   final _round = BehaviorSubject<int>();
 
   Sink<List<CardModel>> get cardsSink => _cards.sink;
   Sink<List<CardModel>> get chosenCardsSink => _chosenCards.sink;
+  Sink<PlayerModel> get playerSink => _player.sink;
   Sink<List<PlayerModel>> get playersSink => _players.sink;
   Sink<int> get roundSink => _round.sink;
 
   Stream<List<CardModel>> get cardsStream => _cards.stream;
   Stream<List<CardModel>> get chosenCardsStream => _chosenCards.stream;
   Stream<List<PlayerModel>> get playersStream => _players.stream;
+  Stream<PlayerModel> get playerStream => _player.stream;
   Stream<int> get roundStream => _round.stream;
 
   void addChosenCards(dynamic data) {
@@ -42,16 +45,16 @@ class GameBloc {
     cardsSink.add(cards);
   }
 
-  void addPlayers(dynamic data, BuildContext context) {
+  void addPlayers(dynamic data) {
     List<PlayerModel> players = data
         .map<PlayerModel>((dynamic player) => PlayerModel.fromJson(player))
         .toList();
 
-    playersSink.add(players);
+    PlayerModel player =
+        players.firstWhere((player) => player.id == game.playerID);
 
-    // if (players.length < 2) {
-    //   Navigator.pop(context);
-    // }
+    playerSink.add(player);
+    playersSink.add(players);
   }
 
   Stream<bool> get isDealer {
@@ -61,11 +64,7 @@ class GameBloc {
           PlayerModel player =
               players.firstWhere((player) => player.id == _game.playerID);
 
-          if (player.dealer) {
-            sink.add(true);
-          } else {
-            sink.add(false);
-          }
+          sink.add(player.dealer);
         },
       ),
     );
@@ -75,10 +74,7 @@ class GameBloc {
     return playersStream.transform(
       StreamTransformer<List<PlayerModel>, bool>.fromHandlers(
         handleData: (players, sink) {
-          int numOfPlayers =
-              players.where((player) => player.name != null).length;
-
-          if (numOfPlayers > 1) {
+          if (players.length > 1) {
             sink.add(true);
           } else {
             sink.add(false);
@@ -93,6 +89,7 @@ class GameBloc {
   dispose() {
     _chosenCards.close();
     _cards.close();
+    _player.close();
     _players.close();
     _round.close();
   }

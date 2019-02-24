@@ -30,7 +30,7 @@ class _StartState extends State<Start> {
   }
 
   void startGame() {
-    game.send('start_game', '');
+    game.send('game_start', '');
   }
 
   @override
@@ -57,9 +57,10 @@ class _StartState extends State<Start> {
         _gameBloc.addCards(message["data"]);
         break;
       case 'players_list':
-        _gameBloc.addPlayers(message["data"], context);
+        _gameBloc.addPlayers(message["data"]);
         break;
       case 'game_start':
+        _gameBloc.addPlayers(message["data"]);
         _gameBloc.roundSink.add(1);
         continue game_has_started;
       game_has_started:

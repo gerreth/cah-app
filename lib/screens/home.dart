@@ -47,7 +47,7 @@ class _HomeState extends State<Home> {
   void _update(message) {
     switch (message["action"]) {
       case 'players_list':
-        _gameBloc.addPlayers(message["data"], context);
+        _gameBloc.addPlayers(message["data"]);
         break;
     }
   }

@@ -54,7 +54,7 @@ class _GameState extends State<Game> {
       case 'players_list':
         print('players_list');
         _bloc.addChosenCards(message["data"]);
-        _bloc.addPlayers(message["data"], context);
+        _bloc.addPlayers(message["data"]);
         break;
       case 'next_round':
         _bloc.roundSink.add(message["data"]);
