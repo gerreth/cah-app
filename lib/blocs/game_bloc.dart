@@ -24,6 +24,12 @@ class GameBloc {
   Stream<List<PlayerModel>> get playersStream => _players.stream;
   Stream<int> get roundStream => _round.stream;
 
+  void addBlackCard(dynamic data) {
+    CardModel card = CardModel.fromJson(data);
+
+    blackCardSink.add(card);
+  }
+
   void addPlayers(dynamic data) {
     List<PlayerModel> players = data
         .map<PlayerModel>((dynamic player) => PlayerModel.fromJson(player))

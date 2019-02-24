@@ -59,7 +59,7 @@ class _StartState extends State<Start> {
       case 'game_start':
         _gameBloc.addPlayers(message['data']['players_list']);
         _gameBloc.roundSink.add(message['data']['round']);
-        _gameBloc.blackCardSink.add(message['data']['card']);
+        _gameBloc.addBlackCard(message['data']['card']);
         continue game_has_started;
       game_has_started:
       case 'game_has_started':
