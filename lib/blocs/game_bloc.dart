@@ -31,8 +31,6 @@ class GameBloc {
         .map<CardModel>((PlayerModel player) => player.card)
         .toList();
 
-    print(cards);
-
     chosenCardsSink.add(cards);
   }
 
@@ -49,13 +47,11 @@ class GameBloc {
         .map<PlayerModel>((dynamic player) => PlayerModel.fromJson(player))
         .toList();
 
-    print(players);
-
     playersSink.add(players);
 
-    if (players.length < 2) {
-      Navigator.pop(context);
-    }
+    // if (players.length < 2) {
+    //   Navigator.pop(context);
+    // }
   }
 
   Stream<bool> get isDealer {

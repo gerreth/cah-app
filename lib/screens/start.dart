@@ -20,7 +20,7 @@ class Start extends StatefulWidget {
 }
 
 class _StartState extends State<Start> {
-  GameBloc _bloc;
+  GameBloc _gameBloc;
 
   void leaveGame() {
     game.send('leave', game.playerID);
@@ -46,27 +46,69 @@ class _StartState extends State<Start> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _bloc = GameProvider.of(context);
+    _gameBloc = GameProvider.of(context);
   }
 
   void _update(message) {
     switch (message["action"]) {
       case 'player_cards':
-        print('player_cards');
-        _bloc.addCards(message["data"]);
+        _gameBloc.addCards(message["data"]);
         break;
       case 'players_list':
-        print('start -> players_list');
-        _bloc.addPlayers(message["data"], context);
+        _gameBloc.addPlayers(message["data"], context);
         break;
       case 'game_start':
-        _bloc.roundSink.add(1);
+        _gameBloc.roundSink.add(1);
         continue game_has_started;
       game_has_started:
       case 'game_has_started':
         Navigator.pushNamed(context, '/game');
         break;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StartView(
+      bloc: _gameBloc,
+      onBack: () => leaveGame(),
+      onStart: () => startGame(),
+    );
+  }
+}
+
+class StartView extends StatelessWidget {
+  StartView({Key key, this.bloc, this.onBack, this.onStart}) : super(key: key);
+
+  final GameBloc bloc;
+  final Function onBack;
+  final Function onStart;
+
+  Widget renderPlayers(List<PlayerModel> players) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: ListView(
+        shrinkWrap: true,
+        children: players.map(
+          (player) {
+            return Text(
+              player.name,
+              style: TextStyle(color: Colors.white),
+            );
+          },
+        ).toList(),
+      ),
+    );
+  }
+
+  Widget renderButton(bool allowSubmit) {
+    String text = allowSubmit ? 'Starten' : 'Warten';
+    Function onTap = allowSubmit ? onStart : () {};
+
+    return Button(
+      text: text,
+      onTap: onTap,
+    );
   }
 
   @override
@@ -78,76 +120,91 @@ class _StartState extends State<Start> {
       ),
     );
 
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
+    return StartTemplate(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          BackButton(
+            onTap: onBack,
+          ),
+          StreamBuilder(
+            stream: bloc.playersStream,
+            builder: (BuildContext context,
+                AsyncSnapshot<List<PlayerModel>> snapshot) {
+              // TODO: handle waiting and error
+              if (snapshot.hasError) return Text('error');
+              if (snapshot.data == null) return Text('waiting');
+
+              return renderPlayers(snapshot.data);
+            },
+          ),
+          StreamBuilder(
+            stream: bloc.allowSubmit,
+            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+              // TODO: handle waiting and error
+              if (snapshot.hasError) return Text('error');
+              if (snapshot.data == null) return Text('waiting');
+
+              return renderButton(snapshot.data);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BackButton extends StatelessWidget {
+  BackButton({Key key, this.onTap}) : super(key: key);
+
+  final Function onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        height: 48,
+        width: 48,
+        child: Material(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24.0),
+          ),
           color: Colors.black,
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                height: 40,
-                width: 40,
-                child: Material(
-                  color: Colors.black,
-                  child: InkResponse(
-                    highlightShape: BoxShape.circle,
-                    highlightColor: Colors.white70,
-                    splashColor: Colors.white54,
-                    onTap: () => leaveGame(),
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              StreamBuilder(
-                stream: _bloc.playersStream,
-                builder: (BuildContext context,
-                    AsyncSnapshot<List<PlayerModel>> snapshot) {
-                  // TODO: handle waiting and error
-                  if (snapshot.hasError) return Text('error');
-                  if (snapshot.data == null) return Text('waiting');
+          child: InkResponse(
+            borderRadius: BorderRadius.circular(24.0),
+            containedInkWell: true,
+            highlightShape: BoxShape.rectangle,
+            highlightColor: Colors.white.withOpacity(0.2),
+            splashColor: Colors.white.withOpacity(0.2),
+            onTap: onTap,
+            child: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-                  return ListView(
-                    shrinkWrap: true,
-                    children: snapshot.data
-                        .where((player) => player.name != null)
-                        .map<Widget>(
-                          (player) => Text(
-                                player.name,
-                                style: TextStyle(color: Colors.white),
-                              ),
-                        )
-                        .toList(),
-                  );
-                },
-              ),
-              StreamBuilder(
-                stream: _bloc.allowSubmit,
-                builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-                  // TODO: handle waiting and error
-                  if (snapshot.hasError) return Text('error');
-                  if (snapshot.data == null) return Text('waiting');
+class StartTemplate extends StatelessWidget {
+  StartTemplate({this.child}) : super();
 
-                  return snapshot.data
-                      ? Button(
-                          text: 'Starten',
-                          onTap: () {
-                            startGame();
-                          },
-                        )
-                      : Button(
-                          text: 'wait',
-                          onTap: () {},
-                        );
-                },
-              ),
-            ],
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            color: Colors.black,
+            child: child,
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 32),
           ),
         ),
       ),

@@ -18,11 +18,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   TextEditingController controller = TextEditingController();
-  // GameCommunication _game = GameCommunication();
-  GameBloc _bloc;
+  GameBloc _gameBloc;
 
   void joinGame() {
-    print('home -> join');
     game.send('join', controller.text);
     Navigator.pushNamed(context, '/start');
   }
@@ -42,18 +40,13 @@ class _HomeState extends State<Home> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _bloc = GameProvider.of(context);
+    _gameBloc = GameProvider.of(context);
   }
 
   void _update(message) {
     switch (message["action"]) {
-      case 'joined':
-        print('home -> joined');
-        Navigator.pushNamed(context, '/start');
-        break;
       case 'players_list':
-        print('home -> players_list');
-        _bloc.addPlayers(message["data"], context);
+        _gameBloc.addPlayers(message["data"], context);
         break;
     }
   }
