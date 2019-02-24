@@ -111,12 +111,14 @@ class GameView extends StatelessWidget {
               if (player.dealer) {
                 return DealerView(
                   nextRound: onNextRound,
+                  roundBloc: roundBloc,
                 );
               } else {
                 return PlayerView(
-                    player: player,
-                    chooseCard: onChooseCard,
-                    submitChosenCard: onSubmitChosenCard);
+                  player: player,
+                  chooseCard: onChooseCard,
+                  submitChosenCard: onSubmitChosenCard,
+                );
               }
             },
           ),
@@ -127,15 +129,59 @@ class GameView extends StatelessWidget {
 }
 
 class DealerView extends StatelessWidget {
-  DealerView({Key key, @required this.nextRound}) : super(key: key);
+  DealerView({
+    Key key,
+    @required this.nextRound,
+    @required this.roundBloc,
+  }) : super(key: key);
 
   final Function nextRound;
+  final RoundBloc roundBloc;
+
+  // List<Widget> renderCards() {
+  //   return player.cards.map(
+  //     (card) {
+  //       return Card(
+  //         onTap: chooseCard,
+  //         card: card,
+  //       );
+  //     },
+  //   ).toList();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Button(
-      text: 'TEST',
-      onTap: nextRound,
+    return Column(
+      children: <Widget>[
+        StreamBuilder(
+          stream: roundBloc.chosenCardStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) return Text('error');
+            if (snapshot.data == null) return Text('waiting');
+
+            print(snapshot.data);
+
+            return GridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              padding: EdgeInsets.symmetric(vertical: 16),
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              children: snapshot.data.map<Widget>((dynamic item) {
+                return Card(
+                  onTap: () {},
+                  card: item['card'],
+                );
+              }).toList(),
+            );
+          },
+        ),
+        Button(
+          text: 'TEST',
+          onTap: nextRound,
+        ),
+      ],
     );
   }
 }
@@ -155,20 +201,9 @@ class PlayerView extends StatelessWidget {
   List<Widget> renderCards() {
     return player.cards.map(
       (card) {
-        return Material(
-          child: InkWell(
-            onTap: () {
-              chooseCard(card);
-            },
-            highlightColor: Colors.green,
-            splashColor: Colors.green,
-            child: Container(
-              child: CustomBody2(
-                card.cardText,
-              ),
-              padding: EdgeInsets.all(16),
-            ),
-          ),
+        return Card(
+          onTap: chooseCard,
+          card: card,
         );
       },
     ).toList();
@@ -196,6 +231,32 @@ class PlayerView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class Card extends StatelessWidget {
+  Card({Key key, this.card, this.onTap}) : super(key: key);
+
+  final CardModel card;
+  final Function onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: InkWell(
+        onTap: () {
+          onTap(card);
+        },
+        highlightColor: Colors.green,
+        splashColor: Colors.green,
+        child: Container(
+          child: CustomBody2(
+            card.cardText,
+          ),
+          padding: EdgeInsets.all(16),
+        ),
+      ),
     );
   }
 }

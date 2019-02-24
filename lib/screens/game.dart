@@ -46,12 +46,13 @@ class _GameState extends State<Game> {
     switch (message['action']) {
       case 'game_next_round':
         _playerBloc.chosenCardSink.add(null);
+        _roundBloc.chosenCardsSink.add(null);
         _gameBloc.addPlayers(message['data']['players_list']);
         _roundBloc.addBlackCard(message['data']['card']);
         _roundBloc.nextRound(message['data']['round']);
         break;
       case 'game_chosen_cards':
-        // _gameBloc.addChosenCards(message['data']);
+        _roundBloc.addChosenCards(message['data']);
         break;
     }
   }
