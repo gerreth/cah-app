@@ -9,26 +9,26 @@ import '../models/player_model.dart';
 class GameBloc {
   GameCommunication _game = GameCommunication();
 
-  final _blackCard = BehaviorSubject<CardModel>();
+  // final _blackCard = BehaviorSubject<CardModel>();
   final _player = BehaviorSubject<PlayerModel>();
   final _players = BehaviorSubject<List<PlayerModel>>();
-  final _round = BehaviorSubject<int>();
+  // final _round = BehaviorSubject<int>();
 
-  Sink<CardModel> get blackCardSink => _blackCard.sink;
+  // Sink<CardModel> get blackCardSink => _blackCard.sink;
   Sink<PlayerModel> get playerSink => _player.sink;
   Sink<List<PlayerModel>> get playersSink => _players.sink;
-  Sink<int> get roundSink => _round.sink;
+  // Sink<int> get roundSink => _round.sink;
 
-  Stream<CardModel> get blackCardStream => _blackCard.stream;
+  // Stream<CardModel> get blackCardStream => _blackCard.stream;
   Stream<PlayerModel> get playerStream => _player.stream;
   Stream<List<PlayerModel>> get playersStream => _players.stream;
-  Stream<int> get roundStream => _round.stream;
+  // Stream<int> get roundStream => _round.stream;
 
-  void addBlackCard(dynamic data) {
-    CardModel card = CardModel.fromJson(data);
+  // void addBlackCard(dynamic data) {
+  //   CardModel card = CardModel.fromJson(data);
 
-    blackCardSink.add(card);
-  }
+  //   blackCardSink.add(card);
+  // }
 
   void addPlayers(dynamic data) {
     List<PlayerModel> players = data
@@ -72,9 +72,9 @@ class GameBloc {
   void nextRound(int round) {}
 
   dispose() {
-    _blackCard.close();
+    // _blackCard.close();
     _player.close();
     _players.close();
-    _round.close();
+    //   _round.close();
   }
 }

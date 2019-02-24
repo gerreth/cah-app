@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 
 import '../blocs/game_bloc.dart';
+import '../blocs/round_bloc.dart';
 import '../models/player_model.dart';
 import '../provider/game_communication.dart';
 import '../provider/game_provider.dart';
@@ -23,6 +24,7 @@ class Start extends StatefulWidget {
 
 class _StartState extends State<Start> {
   GameBloc _gameBloc;
+  RoundBloc _roundBloc = RoundBloc();
 
   void leaveGame() {
     game.send('leave', game.playerID);
@@ -58,8 +60,8 @@ class _StartState extends State<Start> {
         break;
       case 'game_start':
         _gameBloc.addPlayers(message['data']['players_list']);
-        _gameBloc.roundSink.add(message['data']['round']);
-        _gameBloc.addBlackCard(message['data']['card']);
+        _roundBloc.nextRound(message['data']['round']);
+        _roundBloc.addBlackCard(message['data']['card']);
         continue game_has_started;
       game_has_started:
       case 'game_has_started':

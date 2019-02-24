@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'screens/game_new.dart';
+import 'screens/game.dart';
 import 'screens/home.dart';
 import 'screens/start.dart';
 

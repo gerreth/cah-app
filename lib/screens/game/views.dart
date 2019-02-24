@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../blocs/game_bloc.dart';
 import '../../blocs/player_bloc.dart';
+import '../../blocs/round_bloc.dart';
 import '../../models/card_model.dart';
 import '../../models/player_model.dart';
 import '../../widgets/atoms.dart' show Button, CustomBackButton, CustomBody2;
@@ -17,12 +18,14 @@ class GameView extends StatelessWidget {
     @required this.onSubmitChosenCard,
     @required this.onNextRound,
     @required this.playerBloc,
+    @required this.roundBloc,
   }) : super(key: key);
   final Function onBack;
   final Function onChooseCard;
   final Function onSubmitChosenCard;
   final Function onNextRound;
   final GameBloc gameBloc;
+  final RoundBloc roundBloc;
   final PlayerBloc playerBloc;
 
   Widget renderBlackCard(BuildContext context, CardModel card) {
@@ -87,7 +90,7 @@ class GameView extends StatelessWidget {
             ),
           ),
           StreamBuilder(
-            stream: gameBloc.blackCardStream,
+            stream: roundBloc.blackCardStream,
             builder: (context, AsyncSnapshot<CardModel> snapshot) {
               if (snapshot.hasError) return Text('error');
               if (snapshot.data == null) return Text('waiting');
