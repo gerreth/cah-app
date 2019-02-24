@@ -2,12 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../blocs/game_bloc.dart';
+import '../../blocs/player_bloc.dart';
 import '../../models/card_model.dart';
 import '../../models/player_model.dart';
-
-import '../../blocs/player_bloc.dart';
-import '../../widgets/atoms/button.dart';
-import '../../widgets/atoms/custom_back_button.dart';
+import '../../widgets/atoms.dart' show Button, CustomBackButton, CustomBody2;
 import '../../widgets/templates/default_template.dart';
 
 class GameView extends StatelessWidget {
@@ -28,7 +26,7 @@ class GameView extends StatelessWidget {
   final PlayerBloc playerBloc;
 
   Widget renderBlackCard(BuildContext context, CardModel card) {
-    List<String> text = card.cardText.split('___________');
+    List<String> cardText = card.cardText.split('___________');
 
     return Padding(
       padding: EdgeInsets.all(16.0),
@@ -49,7 +47,7 @@ class GameView extends StatelessWidget {
                   style: DefaultTextStyle.of(context).style,
                   children: <TextSpan>[
                     TextSpan(
-                      text: text[0],
+                      text: cardText[0],
                       style: TextStyle(
                         color: Colors.white,
                       ),
@@ -62,7 +60,7 @@ class GameView extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: text[1],
+                      text: cardText[1],
                       style: TextStyle(
                         color: Colors.white,
                       ),
@@ -162,9 +160,8 @@ class PlayerView extends StatelessWidget {
             highlightColor: Colors.green,
             splashColor: Colors.green,
             child: Container(
-              child: Text(
+              child: CustomBody2(
                 card.cardText,
-                style: TextStyle(fontSize: 14),
               ),
               padding: EdgeInsets.all(16),
             ),
