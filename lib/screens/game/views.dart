@@ -84,7 +84,7 @@ class GameView extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.symmetric(vertical: 16.0),
             child: CustomBackButton(
               onTap: onBack,
             ),
@@ -170,7 +170,7 @@ class DealerView extends StatelessWidget {
               shrinkWrap: true,
               children: snapshot.data.map<Widget>((dynamic item) {
                 return Card(
-                  onTap: () {},
+                  onTap: (card) {},
                   card: item['card'],
                 );
               }).toList(),
