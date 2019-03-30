@@ -28,7 +28,9 @@ class WebSocketsNotifications {
       _channel = new IOWebSocketChannel.connect(serverAddress);
 
       _channel.stream.listen(_onReceptionOfMessageFromServer);
-    } catch (e) {}
+    } catch (e) {
+      print('e: $e');
+    }
   }
 
   reset() {

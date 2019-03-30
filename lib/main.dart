@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'routes.dart';
 import 'theme.dart';
+import 'blocs/round_bloc.dart';
 import 'provider/game_provider.dart';
 
 main() async {
@@ -11,13 +12,15 @@ main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GameProvider(
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        debugShowMaterialGrid: false,
-        theme: theme,
-        onGenerateRoute: routes,
+    return RoundProvider(
+      child: GameProvider(
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          debugShowCheckedModeBanner: false,
+          debugShowMaterialGrid: false,
+          theme: theme,
+          onGenerateRoute: routes,
+        ),
       ),
     );
   }

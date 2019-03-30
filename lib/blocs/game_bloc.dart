@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:rxdart/rxdart.dart';
 
 import '../provider/game_communication.dart';
@@ -6,19 +7,20 @@ import '../models/card_model.dart';
 import '../models/player_model.dart';
 
 class GameBloc {
-  GameCommunication _game = GameCommunication();
-
-  final _chosenWinningCard = BehaviorSubject<CardModel>();
+  final _chosenCard = BehaviorSubject<dynamic>();
+  final _chosenWinner = BehaviorSubject<String>();
   final _player = BehaviorSubject<PlayerModel>();
   final _players = BehaviorSubject<List<PlayerModel>>();
 
+  Sink<dynamic> get chosenCardSink => _chosenCard.sink;
+  Sink<String> get chosenWinnerSink => _chosenWinner.sink;
   Sink<PlayerModel> get playerSink => _player.sink;
   Sink<List<PlayerModel>> get playersSink => _players.sink;
-  Sink<CardModel> get chosenWinningCardSink => _chosenWinningCard.sink;
 
+  Stream<dynamic> get chosenCardStream => _chosenCard.stream;
+  Stream<String> get chosenWinnerStream => _chosenWinner.stream;
   Stream<PlayerModel> get playerStream => _player.stream;
   Stream<List<PlayerModel>> get playersStream => _players.stream;
-  Stream<CardModel> get chosenWinningCardStream => _chosenWinningCard.stream;
 
   void addPlayers(dynamic data) {
     List<PlayerModel> players = data
@@ -32,17 +34,23 @@ class GameBloc {
     playersSink.add(players);
   }
 
-  Stream<bool> get isDealer {
-    return playersStream.transform(
-      StreamTransformer<List<PlayerModel>, bool>.fromHandlers(
-        handleData: (players, sink) {
-          PlayerModel player =
-              players.firstWhere((player) => player.id == _game.playerID);
+  void submitPlayerCard() {
+    dynamic card = _chosenCard.value;
 
-          sink.add(player.dealer);
-        },
-      ),
-    );
+    game.send('player_send_card', jsonEncode(card['card'].toMap()));
+  }
+
+  void submitDealerCard() {
+    dynamic card = _chosenCard.value;
+
+    if (card == null) {
+      game.send('game_next_round', '1');
+    } else {
+      game.send(
+        'dealer_send_card',
+        jsonEncode({'id': card['id'], 'card': card['card'].toMap()}),
+      );
+    }
   }
 
   Stream<bool> get allowSubmit {
@@ -59,10 +67,39 @@ class GameBloc {
     );
   }
 
+  Stream<bool> get playerAllowSubmit {
+    return chosenCardStream.transform(
+      StreamTransformer<dynamic, bool>.fromHandlers(
+        handleData: (card, sink) {
+          if (card != null) {
+            sink.add(true);
+          } else {
+            sink.add(false);
+          }
+        },
+      ),
+    );
+  }
+
+  Stream<bool> get dealerAllowSubmit {
+    return chosenCardStream.transform(
+      StreamTransformer<dynamic, bool>.fromHandlers(
+        handleData: (card, sink) {
+          if (card != null) {
+            sink.add(true);
+          } else {
+            sink.add(false);
+          }
+        },
+      ),
+    );
+  }
+
   void nextRound(int round) {}
 
   dispose() {
-    _chosenWinningCard.close();
+    _chosenCard.close();
+    _chosenWinner.close();
     _player.close();
     _players.close();
   }

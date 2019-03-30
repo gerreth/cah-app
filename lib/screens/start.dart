@@ -10,7 +10,6 @@ import '../models/player_model.dart';
 import '../provider/game_communication.dart';
 import '../provider/game_provider.dart';
 import '../widgets/atoms/button.dart';
-import '../widgets/atoms/custom_back_button.dart';
 import '../widgets/templates/default_template.dart';
 
 class Start extends StatefulWidget {
@@ -24,7 +23,7 @@ class Start extends StatefulWidget {
 
 class _StartState extends State<Start> {
   GameBloc _gameBloc;
-  RoundBloc _roundBloc = RoundBloc();
+  RoundBloc _roundBloc;
 
   void leaveGame() {
     game.send('leave', game.playerID);
@@ -51,6 +50,7 @@ class _StartState extends State<Start> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _gameBloc = GameProvider.of(context);
+    _roundBloc = RoundProvider.of(context);
   }
 
   void _update(message) {
@@ -129,9 +129,6 @@ class StartView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          CustomBackButton(
-            onTap: onBack,
-          ),
           StreamBuilder(
             stream: bloc.playersStream,
             builder: (BuildContext context,
