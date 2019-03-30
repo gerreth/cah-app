@@ -43,7 +43,7 @@ class _StartState extends State<Start> {
 
   @override
   void dispose() {
-    game.addListener(_update);
+    game.removeListener(_update);
     super.dispose();
   }
 
@@ -59,6 +59,7 @@ class _StartState extends State<Start> {
         _gameBloc.addPlayers(message['data']);
         break;
       case 'game_start':
+        print('game_start');
         _gameBloc.addPlayers(message['data']['players_list']);
         _roundBloc.nextRound(message['data']['round']);
         _roundBloc.addBlackCard(message['data']['card']);

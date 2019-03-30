@@ -15,13 +15,15 @@ class GameView extends StatelessWidget {
     @required this.gameBloc,
     @required this.onBack,
     @required this.onChooseCard,
+    @required this.onChooseWinningCard,
     @required this.onSubmitChosenCard,
     @required this.onNextRound,
     @required this.playerBloc,
     @required this.roundBloc,
   }) : super(key: key);
   final Function onBack;
-  final Function onChooseCard;
+  final Function(CardModel) onChooseCard;
+  final Function(CardModel) onChooseWinningCard;
   final Function onSubmitChosenCard;
   final Function onNextRound;
   final GameBloc gameBloc;
@@ -107,10 +109,12 @@ class GameView extends StatelessWidget {
               if (snapshot.data == null) return Text('waiting');
 
               PlayerModel player = snapshot.data;
+              print(player);
 
               if (player.dealer) {
                 return DealerView(
                   nextRound: onNextRound,
+                  onChooseWinningCard: onChooseCard,
                   roundBloc: roundBloc,
                 );
               } else {
@@ -132,21 +136,29 @@ class DealerView extends StatelessWidget {
   DealerView({
     Key key,
     @required this.nextRound,
+    @required this.onChooseWinningCard,
     @required this.roundBloc,
   }) : super(key: key);
 
   final Function nextRound;
+  final Function(CardModel) onChooseWinningCard;
   final RoundBloc roundBloc;
 
-  // List<Widget> renderCards() {
-  //   return player.cards.map(
-  //     (card) {
-  //       return Card(
-  //         onTap: chooseCard,
-  //         card: card,
-  //       );
-  //     },
-  //   ).toList();
+  // Widget renderCards() {
+  //   return GridView.count(
+  //             crossAxisCount: 2,
+  //             crossAxisSpacing: 16,
+  //             mainAxisSpacing: 16,
+  //             padding: EdgeInsets.symmetric(vertical: 16),
+  //             physics: NeverScrollableScrollPhysics(),
+  //             shrinkWrap: true,
+  //             children: data.map<Widget>((dynamic item) {
+  //               return Card(
+  //                 onTap: () {},
+  //                 card: item['card'],
+  //               );
+  //             }).toList(),
+  //           );
   // }
 
   @override
@@ -170,7 +182,7 @@ class DealerView extends StatelessWidget {
               shrinkWrap: true,
               children: snapshot.data.map<Widget>((dynamic item) {
                 return Card(
-                  onTap: (card) {},
+                  onTap: onChooseWinningCard,
                   card: item['card'],
                 );
               }).toList(),

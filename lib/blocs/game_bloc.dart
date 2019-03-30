@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../provider/game_communication.dart';
@@ -9,14 +8,17 @@ import '../models/player_model.dart';
 class GameBloc {
   GameCommunication _game = GameCommunication();
 
+  final _chosenWinningCard = BehaviorSubject<CardModel>();
   final _player = BehaviorSubject<PlayerModel>();
   final _players = BehaviorSubject<List<PlayerModel>>();
 
   Sink<PlayerModel> get playerSink => _player.sink;
   Sink<List<PlayerModel>> get playersSink => _players.sink;
+  Sink<CardModel> get chosenWinningCardSink => _chosenWinningCard.sink;
 
   Stream<PlayerModel> get playerStream => _player.stream;
   Stream<List<PlayerModel>> get playersStream => _players.stream;
+  Stream<CardModel> get chosenWinningCardStream => _chosenWinningCard.stream;
 
   void addPlayers(dynamic data) {
     List<PlayerModel> players = data
@@ -60,6 +62,7 @@ class GameBloc {
   void nextRound(int round) {}
 
   dispose() {
+    _chosenWinningCard.close();
     _player.close();
     _players.close();
   }

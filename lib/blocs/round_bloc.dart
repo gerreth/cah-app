@@ -25,14 +25,15 @@ class RoundBloc {
   }
 
   void addChosenCards(dynamic data) {
-    List<Map<String, dynamic>> cards =
-        data.map<Map<String, dynamic>>((dynamic item) {
-      return {
-        'id': item['id'],
-        'card': CardModel.fromJson(
-            json.decode(item['card'])), // TOOD: Fix decoding here
-      };
-    }).toList();
+    List<Map<String, dynamic>> cards = data.map<Map<String, dynamic>>(
+      (dynamic item) {
+        return {
+          'id': item['id'],
+          'card': CardModel.fromJson(
+              json.decode(item['card'])), // TOOD: Fix decoding here
+        };
+      },
+    ).toList();
 
     chosenCardsSink.add(cards);
   }

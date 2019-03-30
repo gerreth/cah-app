@@ -57,11 +57,15 @@ class _GameState extends State<Game> {
     }
   }
 
-  void chooseCard(CardModel card) {
+  void _chooseWinningCard(CardModel card) {
+    _gameBloc.chosenWinningCardSink.add(card);
+  }
+
+  void _chooseCard(CardModel card) {
     _playerBloc.chosenCardSink.add(card);
   }
 
-  void submitChosenCard() {
+  void _submitChosenCard() {
     _playerBloc.submit();
   }
 
@@ -91,8 +95,9 @@ class _GameState extends State<Game> {
     return GameView(
       gameBloc: _gameBloc,
       onBack: leaveGame,
-      onChooseCard: chooseCard,
-      onSubmitChosenCard: submitChosenCard,
+      onChooseCard: _chooseCard,
+      onChooseWinningCard: _chooseWinningCard,
+      onSubmitChosenCard: _submitChosenCard,
       onNextRound: nextRound,
       playerBloc: _playerBloc,
       roundBloc: _roundBloc,
